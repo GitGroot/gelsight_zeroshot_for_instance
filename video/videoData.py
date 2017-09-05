@@ -4,23 +4,9 @@ import numpy as np
 import random
 data_path = '/home/wangfeng/download/gelSight/fuse/data/gel_fold3_224'
 
-class_attribute_matrix = np.load('../data/class_attribute_matrix.npy')
-# TODO notice that train_label and test_label must be incremental, and start from 0
-train_labels = range(80)
-test_labels = range(80,100)
-
-def get_train_attr_label():
-    ret = []
-    for label in train_labels:
-        ret.append(class_attribute_matrix[label])
-    return np.array(ret)
 
 
-def get_test_attr_label():
-    ret = []
-    for label in test_labels:
-        ret.append(class_attribute_matrix[label])
-    return np.array(ret)
+
 
 
 class Data:
@@ -30,11 +16,26 @@ class Data:
         self.mode = mode
         self.num_step = 5
         self.image_channel = 1 if mode=='gray' else 3
+        self.class_attribute_matrix = np.load('../data/class_attribute_matrix.npy')
+        # TODO notice that train_label and test_label must be incremental, and start from 0
+        self.train_labels = range(80)
+        self.test_labels = range(80, 100)
 
+    def get_train_attr_label(self):
+        ret = []
+        for label in self.train_labels:
+            ret.append(self.class_attribute_matrix[label])
+        return np.array(ret)
+
+    def get_test_attr_label(self):
+        ret = []
+        for label in self.test_labels:
+            ret.append(self.class_attribute_matrix[label])
+        return np.array(ret)
 
 
     def S(self,train):
-        S = get_train_attr_label().T if train else get_test_attr_label().T
+        S = self.get_train_attr_label().T if train else self.get_test_attr_label().T
         return S
         # TODO test for the normalize version
         #return S/[(S[:,i]**2).sum()**0.5 for i in range(S.shape[1])]
@@ -63,11 +64,11 @@ class Data:
                 if self.target_size != 224:
                     image = cv2.resize(image, (self.target_size, self.target_size))
                 frames.append(image)
-            if label in train_labels:
+            if label in self.train_labels:
                 train_videos.append(frames)
-                train_labels.append(label)
-                train_attr.append(class_attribute_matrix[label])
-            elif label in test_labels:
+                train_labels.append(self.train_labels.index(label))
+                train_attr.append(self.class_attribute_matrix[label])
+            elif label in self.test_labels:
                 test_videos.append(frames)
-                test_labels.append(label)
-        return train_videos, train_labels, test_videos, test_labels
+                test_labels.append(self.test_labels.index(label))
+        return train_videos, train_labels, train_attr, test_videos, test_labels

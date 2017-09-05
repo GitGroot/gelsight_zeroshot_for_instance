@@ -28,7 +28,7 @@ def should_record(i):
     return i % 5 == 0 and i != 0
 #-----------------------------------
 
-train = False
+train = True
 x = tf.placeholder(tf.float32, [None, num_steps, image_size, image_size, image_channel])
 S = tf.placeholder(tf.float32, [attr_num, None])
 inputs = tf.reshape(x, shape=[-1, image_size, image_size, image_channel])
@@ -48,15 +48,15 @@ attr_cost = tf.reduce_mean(tf.square(a_ - a))
 
 ld = Data(attr_num, mode='rgb')
 train_videos, train_videos_labels, train_videos_attr_labels, test_videos, test_videos_labels \
-    = ld.get_train_test()
+    = ld.load_gelsight_data()
 sess = tf.Session()
 lam = 1
-cost = class_cost +  lam*attr_cost
+cost = class_cost +  lam * attr_cost
 train_op = tf.train.AdamOptimizer(lr).minimize(cost)
 initialize_global_variables(sess)
 if train:
-    params = tl.files.load_npz(path='../npz/cnnlstm_joint_loss/', name=params_file_name + str(lam)+'normal' + '.npz')
-    tl.files.assign_params(sess, params, network)
+    # params = tl.files.load_npz(path='../npz/cnnlstm_joint_loss/', name=params_file_name + str(lam)+'normal' + '.npz')
+    # tl.files.assign_params(sess, params, network)
     for i in range(150):
         for iter_num in range(int(math.ceil(len(train_videos)/batch_size))):
             video = train_videos[iter_num * batch_size:(iter_num + 1) * batch_size]
@@ -67,9 +67,9 @@ if train:
             _, cost_val, acc_val = sess.run([train_op, cost, acc], feed_dict=feed_dict)
             log2(i, iter_num, cost_val, acc_val, '../log/cnnlstm_joint_loss/' + log_name + str(lam))
         if should_record(i):
-            tl.files.save_npz(network.all_params, '../npz/cnnlstm_joint_loss/'+params_file_name + str(lam)+'normal', sess)
+            tl.files.save_npz(network.all_params, Name + str(lam), sess)
 else:
-    params = tl.files.load_npz(path='../npz/cnnlstm_joint_loss/', name=params_file_name + str(lam)+'normal' + '.npz')
+    params = tl.files.load_npz(path='../npz/cnnlstm_joint_loss/', name=Name + str(lam) + '.npz')
     tl.files.assign_params(sess, params, network)
     dp_dict = tl.utils.dict_to_one(network.all_drop)
     print 'ok'
