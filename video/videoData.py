@@ -4,8 +4,7 @@ import numpy as np
 import random
 data_path = '/home/wangfeng/download/gelSight/fuse/data/gel_fold3_224'
 
-class_attribute_matrix = np.load('class_attribute_matrix.npy')
-
+class_attribute_matrix = np.load('../data/class_attribute_matrix.npy')
 # TODO notice that train_label and test_label must be incremental, and start from 0
 train_labels = range(80)
 test_labels = range(80,100)

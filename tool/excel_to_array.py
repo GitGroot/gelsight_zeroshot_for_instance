@@ -10,4 +10,5 @@ import numpy as np
 #     rowValues= table.row_values(i)
 #     class_attribute.append(rowValues[1:])
 # np.save('class_attribute_matrix', class_attribute)
-print np.load('class_attribute_matrix.npy')
+a = np.load('data/class_attribute_matrix.npy')
+print a
